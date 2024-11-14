@@ -1,0 +1,89 @@
+// Pin configuration
+const int leftSensor = 2;     // Left IR sensor
+const int centerSensor = 3;   // Center IR sensor
+const int rightSensor = 4;    // Right IR sensor
+const int leftMotorForward = 5;   // Left motor forward
+const int leftMotorBackward = 6;  // Left motor backward
+const int rightMotorForward = 7;  // Right motor forward
+const int rightMotorBackward = 8; // Right motor backward
+
+// Track choice variable
+bool routeA = true; // Set to true to select route A
+
+void setup() {
+  pinMode(leftSensor, INPUT);
+  pinMode(centerSensor, INPUT);
+  pinMode(rightSensor, INPUT);
+  pinMode(leftMotorForward, OUTPUT);
+  pinMode(leftMotorBackward, OUTPUT);
+  pinMode(rightMotorForward, OUTPUT);
+  pinMode(rightMotorBackward, OUTPUT);
+}
+
+void loop() {
+  int leftStatus = digitalRead(leftSensor);
+  int centerStatus = digitalRead(centerSensor);
+  int rightStatus = digitalRead(rightSensor);
+
+  // Normal line following
+  if (centerStatus == LOW && leftStatus == HIGH && rightStatus == HIGH) {
+    moveForward();
+  } 
+  else if (centerStatus == HIGH && leftStatus == LOW) {
+    turnLeft();
+  } 
+  else if (centerStatus == HIGH && rightStatus == LOW) {
+    turnRight();
+  } 
+  else if (centerStatus == LOW && leftStatus == LOW && rightStatus == LOW) {
+    // Junction Detected: Decision point
+    if (routeA) {
+      // Route A: turn left at junction
+      chooseLeft();
+    } else {
+      // For other routes (e.g., B or C), add conditions here
+      stopMotors();
+    }
+  }
+  else {
+    stopMotors(); // Stop if sensors are off the line
+  }
+}
+
+void moveForward() {
+  digitalWrite(leftMotorForward, HIGH);
+  digitalWrite(leftMotorBackward, LOW);
+  digitalWrite(rightMotorForward, HIGH);
+  digitalWrite(rightMotorBackward, LOW);
+}
+
+void turnLeft() {
+  digitalWrite(leftMotorForward, LOW);
+  digitalWrite(leftMotorBackward, LOW);
+  digitalWrite(rightMotorForward, HIGH);
+  digitalWrite(rightMotorBackward, LOW);
+}
+
+void turnRight() {
+  digitalWrite(leftMotorForward, HIGH);
+  digitalWrite(leftMotorBackward, LOW);
+  digitalWrite(rightMotorForward, LOW);
+  digitalWrite(rightMotorBackward, LOW);
+}
+
+void chooseLeft() {
+  // Rotate left for route A
+  digitalWrite(leftMotorForward, LOW);
+  digitalWrite(leftMotorBackward, LOW);
+  digitalWrite(rightMotorForward, HIGH);
+  digitalWrite(rightMotorBackward, LOW);
+  delay(500); // Adjust delay for a proper turn
+  moveForward(); // Continue moving forward after turn
+}
+
+void stopMotors() {
+  digitalWrite(leftMotorForward, LOW);
+  digitalWrite(leftMotorBackward, LOW);
+  digitalWrite(rightMotorForward, LOW);
+  digitalWrite(rightMotorBackward, LOW);
+}
